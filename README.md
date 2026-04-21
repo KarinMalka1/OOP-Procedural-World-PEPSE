@@ -1,4 +1,4 @@
-## Avatar & Energy System
+## Procedural-World-PEPSE
 **Package:** `pepse.world.avatar`
 
 To implement the Avatar and adhere to clean code principles, we separated the logic into two main classes:
