@@ -1,39 +1,47 @@
-Q1) To implement the Avatar, we created a dedicated pepse.world.avatar package
-containing the Avatar and EnergyMeter classes. The Avatar class extends
-GameObject and handles physics, input processing, and movement logic. To
-adhere to clean code principles, we separated the UI logic into the EnergyMeter
-class. The relationship between them is maintained via a functional callback
-(Consumer<Float>); the Avatar triggers this callback whenever its internal energy
-state changes, allowing the EnergyMeter to update the display without the Avatar
-holding a direct reference to the UI object.
-We designed state changes by monitoring the Avatar's velocity and input within
-the update() loop. We distinguished between four main states: Idle (no velocity),
-Running (horizontal velocity), Jumping/Falling (vertical velocity), and Flying
-(triggered by specific key combinations). Based on these conditions, we dynamically
-swapped the object's Renderable (animation) to visually reflect the current physical
-state, ensuring immediate feedback to the player.
-Energy is modeled as a numeric value (0-100) managed internally by the Avatar.
-It depletes during flight and regenerates while idle. We avoided tight coupling by
-passing a callback function from the EnergyMeter to the Avatar upon initialization.
-When the energy value changes, the Avatar invokes this callback, which updates the
-text on the EnergyMeter. Additionally, the meter includes visual logic to change the
-text color to red when energy drops below 20%, providing an intuitive warning to the
-user.
+## Avatar & Energy System
+**Package:** `pepse.world.avatar`
 
-Q2) The pepse.world.trees package was implemented using a separation of concerns
-between generation and object behavior. The Flora class acts as the manager, determining
-tree positions based on the terrain height and a deterministic seed. It delegates the
-construction of individual trees to the Tree class, which assembles Leaf and Fruit
-objects. The Leaf class manages its own wind simulation using scheduled transitions,
-while the Fruit class handles collision logic to restore the Avatar's energy.
+To implement the Avatar and adhere to clean code principles, we separated the logic into two main classes:
+* **`Avatar`**: Extends `GameObject` and handles physics, input processing, and movement logic.
+* **`EnergyMeter`**: Manages and encapsulates the UI logic.
 
-Q3) We introduced a new class, InfiniteWorld, to handle the procedural generation
-of terrain and trees. This class monitors the Avatar's position and dynamically
-loads new "chunks" of the world while removing distant objects to maintain performance.
+**State Management & Animation:**
+State changes were designed by monitoring the Avatar's velocity and input within the `update()` loop.
+We distinguished between four main physical states:
 
-Q4) We made several changes to the API to support the new features. In the Avatar class,
-we added the public method addEnergy(float amount) to allow external objects (like Fruits)
-modify the avatar's energy state safely. In the Sky class, we added a new static method,
-createSkyObjects, to separate the creation of the static background from dynamic elements
-like clouds and birds.
+1. **Idle**: No velocity.
+2. **Running**: Horizontal velocity.
+3. **Jumping/Falling**: Vertical velocity.
+4. **Flying**: Triggered by specific key combinations.
 
+Based on these conditions, we dynamically swapped the object's `Renderable` (animation)
+to visually reflect the current physical state, ensuring immediate feedback to the player.
+
+**Energy System & UI Decoupling:**
+* Energy is modeled as a numeric value (0-100) managed internally by the `Avatar`. It depletes during flight and regenerates while idle.
+* **Callback Mechanism:** We avoided tight coupling by passing a functional callback (`Consumer<Float>`) from the `EnergyMeter` to the `Avatar` upon initialization. 
+* Whenever the internal energy state changes, the `Avatar` invokes this callback. This allows the `EnergyMeter` to update the display text without the `Avatar` holding a direct reference to the UI object.
+* **Visual Warnings:** The meter includes visual logic to change the text color to red when energy drops below 20%, providing an intuitive warning to the user.
+
+
+## Flora & Environment
+**Package:** `pepse.world.trees`
+
+The flora system was implemented using a strict separation of concerns between generation and object behavior:
+* **`Flora`**: Acts as the manager. It determines tree positions based on the terrain height and a deterministic seed, delegating the construction of individual trees to the `Tree` class.
+* **`Tree`**: Responsible for assembling `Leaf` and `Fruit` objects.
+* **`Leaf`**: Manages its own wind simulation using scheduled transitions.
+* **`Fruit`**: Handles collision logic to restore the Avatar's energy.
+
+
+## Infinite World Generation
+We introduced a new class, **`InfiniteWorld`**, to handle the procedural generation of terrain and trees seamlessly. 
+* This class actively monitors the Avatar's position.
+* It dynamically loads new "chunks" of the world while removing distant objects to maintain optimal performance and memory usage.
+
+
+
+## API & Architecture Updates
+We made several changes to the API to effectively support the new features:
+* **`Avatar`**: Added the public method `addEnergy(float amount)` to allow external objects (like `Fruit`s) to modify the avatar's energy state safely.
+* **`Sky`**: Added a new static method, `createSkyObjects`, to cleanly separate the creation of the static background from dynamic environmental elements like clouds and birds.
